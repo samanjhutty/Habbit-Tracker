@@ -20,18 +20,9 @@ class _AddHabitState extends State<AddHabit> {
   DbController db = Get.find();
   RxBool isStarted = false.obs;
 
-  formatedTime(TimeOfDay time) {
-    String hrs =
-        time.hour.isLowerThan(10) ? '0${time.hour}' : time.hour.toString();
-    String min = time.minute.isLowerThan(10)
-        ? '0${time.minute}'
-        : time.minute.toString();
-    return '$hrs:$min';
-  }
-
   @override
   void initState() {
-    timeController.text = formatedTime(time!);
+    timeController.text = db.formatedDateTimeObj(time!);
     super.initState();
   }
 
@@ -101,7 +92,8 @@ class _AddHabitState extends State<AddHabit> {
                                         await db.myTimePicker(context: context);
                                     if (time == null) return;
                                     setState(() {
-                                      timeController.text = formatedTime(time!);
+                                      timeController.text =
+                                          db.formatedDateTimeObj(time!);
                                     });
                                   },
                                   readOnly: true,
@@ -145,9 +137,12 @@ class _AddHabitState extends State<AddHabit> {
                             child: ElevatedButton(
                                 onPressed: () {
                                   if (formkey.currentState!.validate()) {
-                                    db.addHabit(
+                                    db.newHabit(
                                         title: nameController.text.obs,
-                                        totalTime: 60.0.obs,
+                                        totalTime:
+                                            ((time!.hour * 60) + time!.minute)
+                                                .toDouble()
+                                                .obs,
                                         isStart: isStarted);
                                     Get.back();
                                   }

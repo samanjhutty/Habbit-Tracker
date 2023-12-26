@@ -1,12 +1,14 @@
-import 'dart:async';
+// ignore_for_file: avoid_print
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:habbit_tracker/controller/local/db_constants.dart';
 import 'package:habbit_tracker/model/habit_model.dart';
 
 class DbController extends GetxController {
-  addHabit(
+  double elapsedTime = 0.0;
+  newHabit(
       {required RxString title,
       required RxDouble totalTime,
       required RxBool isStart}) {
@@ -14,7 +16,8 @@ class DbController extends GetxController {
         title: title,
         initialHabbitTime: 0.0.obs,
         totalHabbitTime: totalTime,
-        running: isStart));
+        running: isStart,
+        completed: false.obs));
     box.put(habbitListKey(DateTime.now()), habitList);
   }
 
@@ -29,7 +32,8 @@ class DbController extends GetxController {
         title: title,
         initialHabbitTime: initilTime,
         totalHabbitTime: totalTime,
-        running: isStart);
+        running: isStart,
+        completed: initilTime == totalTime ? true.obs : false.obs);
     box.put(listDayKey, habitList);
   }
 
@@ -47,24 +51,82 @@ class DbController extends GetxController {
     return 'HabbitList-day:$today';
   }
 
-  habitStart({required int index}) {
-    DateTime time = DateTime.now();
+  String formatedDateTimeObj(TimeOfDay time) {
+    String hrs =
+        time.hour.isLowerThan(10) ? '0${time.hour}' : time.hour.toString();
+    String min = time.minute.isLowerThan(10)
+        ? '0${time.minute}'
+        : time.minute.toString();
+    return '$hrs:$min';
+  }
 
-    var list = habitList[index];
+  String formatedTime(int hour, int minute) {
+    String newMin = minute.isLowerThan(10) ? '0$minute' : minute.toString();
+    return '$hour : $newMin';
+  }
+
+  habitOnTap({required int index}) async {
+    HabitModel list = habitList[index];
+    double totalTime = list.totalHabbitTime.value;
+
     list.running.value = !list.running.value;
 
-    double? elapsedTime;
+    if (list.initialHabbitTime.value + elapsedTime == totalTime) {
+      showDialog(
+          context: navigator!.context,
+          builder: (context) => AlertDialog(
+                title: const Text('Reset Habit'),
+                content: const Text(
+                    "You've alrealy completed this habit, would you like to reset it?"),
+                actions: [
+                  TextButton(
+                      onPressed: () {
+                        list.initialHabbitTime.value = 0;
+                        elapsedTime = 0;
+                        navigator!.pop();
+                      },
+                      child: const Text('Yes')),
+                  TextButton(
+                      onPressed: () {
+                        navigator!.pop();
+                        list.running.value = false;
+                      },
+                      child: const Text('No'))
+                ],
+              ));
+    }
 
-    Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      if (list.running.value == false ||
-          elapsedTime == list.totalHabbitTime.value) {
-        print('habit stoped');
-        list.running.value = false;
-        timer.cancel();
-      }
-      print('habit running...');
-      elapsedTime = DateTime.now().difference(time).inMinutes.toDouble();
-      list.initialHabbitTime.value = elapsedTime!;
-    });
+    DateTime time = DateTime.now();
+    if (list.running.value) {
+      elapsedTime += list.initialHabbitTime.value;
+      print('time outside: ${elapsedTime.toStringAsFixed(2)}');
+
+      Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+        list.initialHabbitTime.value = list.initialHabbitTime.value;
+
+        if (list.running.value == false ||
+            list.initialHabbitTime.value + elapsedTime >= totalTime) {
+          timer.cancel();
+          list.running.value = false;
+          print('time running: ${elapsedTime.toStringAsFixed(2)}');
+          if (list.initialHabbitTime.value + elapsedTime >= totalTime) {
+            timer.cancel();
+
+            // show notification
+            Get.rawSnackbar(message: 'Habbit completed');
+            list.running.value = false;
+          }
+
+          // box.put(habbitListKey(DateTime.now()), habitList);
+        } else {
+          habitList[index].completed = true.obs;
+          var time2 = DateTime.now();
+          list.initialHabbitTime.value =
+              ((time2.difference(time).inSeconds) / 60).toDouble();
+          print(
+              'total time: ${list.initialHabbitTime.value.toStringAsFixed(2)}');
+        }
+      });
+    }
   }
 }

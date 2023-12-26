@@ -21,13 +21,14 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       initialHabbitTime: fields[3] as RxDouble,
       totalHabbitTime: fields[2] as RxDouble,
       running: fields[1] as RxBool,
+      completed: fields[4] as RxBool,
     );
   }
 
   @override
   void write(BinaryWriter writer, HabitModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       ..writeByte(2)
       ..write(obj.totalHabbitTime)
       ..writeByte(3)
-      ..write(obj.initialHabbitTime);
+      ..write(obj.initialHabbitTime)
+      ..writeByte(4)
+      ..write(obj.completed);
   }
 
   @override

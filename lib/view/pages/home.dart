@@ -15,7 +15,7 @@ class MyHomeTab extends StatefulWidget {
 }
 
 class _MyHomeTabState extends State<MyHomeTab> {
-  List<HabitModel> list = <HabitModel>[];
+  List<HabitModel>? list = <HabitModel>[];
 
   @override
   void initState() {
@@ -64,7 +64,7 @@ class _MyHomeTabState extends State<MyHomeTab> {
             ),
             body: Stack(
               children: [
-                list.isEmpty
+                list!.isEmpty
                     ? const Center(
                         child: Text(
                           "No habbit maintained, let's build a new one!",
@@ -75,11 +75,11 @@ class _MyHomeTabState extends State<MyHomeTab> {
                         ),
                       )
                     : isMobile || device.width < 650
-                        ? HabitTile(list: list)
+                        ? HabitTile(list: list!)
                         : Row(
                             children: [
                               SizedBox(
-                                  width: 450, child: HabitTile(list: list)),
+                                  width: 450, child: HabitTile(list: list!)),
                               Expanded(
                                 child: Container(
                                   color: scheme.secondaryContainer,
