@@ -17,27 +17,30 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return HabitModel(
-      title: fields[0] as RxString,
-      initialHabbitTime: fields[3] as RxDouble,
-      totalHabbitTime: fields[2] as RxDouble,
-      running: fields[1] as RxBool,
-      completed: fields[4] as RxBool,
+      title: fields[0] as String,
+      initialHabbitTime: fields[2] as double,
+      elapsedTime: fields[3] as double,
+      totalHabbitTime: fields[4] as double,
+      running: fields[1] as bool,
+      completed: fields[5] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, HabitModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
       ..write(obj.running)
       ..writeByte(2)
-      ..write(obj.totalHabbitTime)
-      ..writeByte(3)
       ..write(obj.initialHabbitTime)
+      ..writeByte(3)
+      ..write(obj.elapsedTime)
       ..writeByte(4)
+      ..write(obj.totalHabbitTime)
+      ..writeByte(5)
       ..write(obj.completed);
   }
 

@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:habbit_tracker/controller/local/db_controller.dart';
+import 'package:habbit_tracker/controller/local/time_controller.dart';
+
+import '../../model/habit_model.dart';
 
 class AddHabit extends StatefulWidget {
-  const AddHabit({super.key});
+  const AddHabit({super.key, this.data, this.index});
+
+  final HabitModel? data;
+  final int? index;
 
   @override
   State<AddHabit> createState() => _AddHabitState();
@@ -18,11 +24,20 @@ class _AddHabitState extends State<AddHabit> {
   TimeOfDay? time = const TimeOfDay(hour: 1, minute: 0);
 
   DbController db = Get.find();
-  RxBool isStarted = false.obs;
+  TimeController timedb = Get.find();
+  bool isStarted = false;
 
   @override
   void initState() {
-    timeController.text = db.formatedDateTimeObj(time!);
+    if (widget.data != null && widget.index != null) {
+      var totalTime = widget.data!.totalHabbitTime;
+
+      nameController.text = widget.data!.title;
+      time = timedb.doubleToTimeOfDay(totalTime);
+      isStarted = widget.data!.running;
+    }
+    timeController.text = timedb.formatedDateTimeObj(time!);
+
     super.initState();
   }
 
@@ -93,7 +108,7 @@ class _AddHabitState extends State<AddHabit> {
                                     if (time == null) return;
                                     setState(() {
                                       timeController.text =
-                                          db.formatedDateTimeObj(time!);
+                                          timedb.formatedDateTimeObj(time!);
                                     });
                                   },
                                   readOnly: true,
@@ -118,14 +133,14 @@ class _AddHabitState extends State<AddHabit> {
                               'Start now',
                               style: TextStyle(fontSize: 16),
                             ),
-                            Obx(
-                              () => Switch.adaptive(
-                                  activeColor: scheme.primary,
-                                  value: isStarted.value,
-                                  onChanged: (value) {
-                                    isStarted.value = value;
-                                  }),
-                            ),
+                            Switch.adaptive(
+                                activeColor: scheme.primary,
+                                value: isStarted,
+                                onChanged: (value) {
+                                  setState(() {
+                                    isStarted = value;
+                                  });
+                                }),
                             const SizedBox()
                           ],
                         ),
@@ -137,14 +152,28 @@ class _AddHabitState extends State<AddHabit> {
                             child: ElevatedButton(
                                 onPressed: () {
                                   if (formkey.currentState!.validate()) {
-                                    db.newHabit(
-                                        title: nameController.text.obs,
-                                        totalTime:
-                                            ((time!.hour * 60) + time!.minute)
-                                                .toDouble()
-                                                .obs,
-                                        isStart: isStarted);
-                                    Get.back();
+                                    widget.data == null || widget.index == null
+                                        ? db.newHabit(
+                                            title: nameController.text,
+                                            totalTime:
+                                                timedb.timeOfDayToDouble(time!),
+                                            isStart: isStarted)
+                                        : db.updateHabit(
+                                            index: widget.index!,
+                                            title: nameController.text,
+                                            elapsedTime:
+                                                widget.data!.elapsedTime,
+                                            initilTime:
+                                                widget.data!.initialHabbitTime,
+                                            totalTime: time != null
+                                                ? timedb
+                                                    .timeOfDayToDouble(time!)
+                                                : widget.data!.totalHabbitTime,
+                                            listDayKey:
+                                                DbController.habbitListKey(
+                                                    DateTime.now()),
+                                            isStart: isStarted);
+                                    Navigator.pop(context);
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(

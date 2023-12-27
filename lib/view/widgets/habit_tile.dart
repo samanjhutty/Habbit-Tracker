@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:habbit_tracker/controller/local/db_controller.dart';
+import 'package:habbit_tracker/controller/local/time_controller.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import '../../model/habit_model.dart';
+import '../pages/add_habit.dart';
 
 class HabitTile extends StatefulWidget {
   const HabitTile({super.key, required this.list});
@@ -13,8 +15,6 @@ class HabitTile extends StatefulWidget {
 }
 
 class _HabitTileState extends State<HabitTile> {
-  DbController db = Get.find();
-
   @override
   Widget build(BuildContext context) {
     ColorScheme scheme = Theme.of(context).colorScheme;
@@ -25,22 +25,15 @@ class _HabitTileState extends State<HabitTile> {
             ? const Center(
                 child: Text("Let's create a new habit."),
               )
-            : Obx(() {
+            : GetBuilder<DbController>(builder: (db) {
                 HabitModel list = widget.list[index];
                 double percentCompleted =
-                    (list.initialHabbitTime.value + db.elapsedTime) /
-                        list.totalHabbitTime.value;
+                    (widget.list[index].initialHabbitTime +
+                            habitList[index].elapsedTime) /
+                        widget.list[index].totalHabbitTime;
 
-                double initialTime = list.totalHabbitTime.value -
-                    (list.initialHabbitTime.value + db.elapsedTime);
-
-                String remainingInitialTime = initialTime > 60
-                    ? '${db.formatedTime((initialTime / 60).floor(), (initialTime - 60).ceil())} hrs'
-                    : '${initialTime.ceil()} min';
-
-                String totalTime = list.totalHabbitTime.value > 60
-                    ? '${db.formatedTime((list.totalHabbitTime.value / 60).floor(), (list.totalHabbitTime.value - 60).ceil())} hrs'
-                    : '${list.totalHabbitTime.ceil()} min';
+                double initialTime = list.totalHabbitTime -
+                    (list.initialHabbitTime + habitList[index].elapsedTime);
 
                 return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -50,8 +43,7 @@ class _HabitTileState extends State<HabitTile> {
                             vertical: 8, horizontal: 12),
                         minVerticalPadding: 0,
                         leading: Tooltip(
-                          message:
-                              list.running.value == true ? 'Pause' : 'Play',
+                          message: list.running == true ? 'Pause' : 'Play',
                           child: InkWell(
                             customBorder: const CircleBorder(),
                             onTap: () => db.habitOnTap(index: index),
@@ -59,7 +51,7 @@ class _HabitTileState extends State<HabitTile> {
                               fit: StackFit.passthrough,
                               alignment: Alignment.center,
                               children: [
-                                list.running.value == true
+                                list.running == true
                                     ? const Icon(Icons.pause)
                                     : const Icon(Icons.play_arrow),
                                 CircularPercentIndicator(
@@ -75,20 +67,31 @@ class _HabitTileState extends State<HabitTile> {
                             ),
                           ),
                         ),
-                        title: Text(list.title.value,
+                        title: Text(list.title,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 20)),
-                        subtitle: Text(
-                            'Remaining  $remainingInitialTime / $totalTime',
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 12)),
+                        subtitle: GetBuilder<TimeController>(builder: (timedb) {
+                          String remainingInitialTime = initialTime > 60
+                              ? '${timedb.formatedTime((initialTime / 60).floor(), (initialTime - 60).ceil())} hrs'
+                              : '${initialTime.ceil()} min';
+
+                          String totalTime = list.totalHabbitTime > 60
+                              ? '${timedb.formatedTime((list.totalHabbitTime / 60).floor(), (list.totalHabbitTime - 60).ceil())} hrs'
+                              : '${list.totalHabbitTime.ceil()} min';
+
+                          return Text(
+                              'Remaining  $remainingInitialTime / $totalTime',
+                              style: const TextStyle(
+                                  color: Colors.grey, fontSize: 12));
+                        }),
                         trailing: PopupMenuButton(
                           tooltip: 'Settings',
                           position: PopupMenuPosition.under,
                           child: const Icon(Icons.settings),
                           itemBuilder: (context) => [
                             PopupMenuItem(
-                                onTap: () {},
+                                onTap: () => Get.to(
+                                    () => AddHabit(data: list, index: index)),
                                 child: const Row(
                                   children: [
                                     Icon(Icons.edit),

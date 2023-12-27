@@ -7,34 +7,38 @@ import 'package:habbit_tracker/controller/local/db_constants.dart';
 import 'package:habbit_tracker/model/habit_model.dart';
 
 class DbController extends GetxController {
-  double elapsedTime = 0.0;
   newHabit(
-      {required RxString title,
-      required RxDouble totalTime,
-      required RxBool isStart}) {
+      {required String title,
+      required double totalTime,
+      required bool isStart}) {
     habitList.add(HabitModel(
         title: title,
-        initialHabbitTime: 0.0.obs,
+        initialHabbitTime: 0.0,
+        elapsedTime: 0.0,
         totalHabbitTime: totalTime,
         running: isStart,
-        completed: false.obs));
+        completed: false));
     box.put(habbitListKey(DateTime.now()), habitList);
+    update();
   }
 
   updateHabit(
       {required int index,
-      required RxString title,
-      required RxDouble initilTime,
-      required RxDouble totalTime,
-      required RxDouble listDayKey,
-      required RxBool isStart}) {
+      required String title,
+      required double initilTime,
+      required double elapsedTime,
+      required double totalTime,
+      required String listDayKey,
+      required bool isStart}) {
     habitList[index] = HabitModel(
         title: title,
         initialHabbitTime: initilTime,
+        elapsedTime: elapsedTime,
         totalHabbitTime: totalTime,
         running: isStart,
-        completed: initilTime == totalTime ? true.obs : false.obs);
+        completed: initilTime == totalTime ? true : false);
     box.put(listDayKey, habitList);
+    update();
   }
 
   Future myTimePicker({required context}) async {
@@ -51,27 +55,16 @@ class DbController extends GetxController {
     return 'HabbitList-day:$today';
   }
 
-  String formatedDateTimeObj(TimeOfDay time) {
-    String hrs =
-        time.hour.isLowerThan(10) ? '0${time.hour}' : time.hour.toString();
-    String min = time.minute.isLowerThan(10)
-        ? '0${time.minute}'
-        : time.minute.toString();
-    return '$hrs:$min';
-  }
-
-  String formatedTime(int hour, int minute) {
-    String newMin = minute.isLowerThan(10) ? '0$minute' : minute.toString();
-    return '$hour : $newMin';
-  }
-
   habitOnTap({required int index}) async {
-    HabitModel list = habitList[index];
-    double totalTime = list.totalHabbitTime.value;
+    double totalTime = habitList[index].totalHabbitTime;
 
-    list.running.value = !list.running.value;
+    habitList[index].running = !habitList[index].running;
+    update();
 
-    if (list.initialHabbitTime.value + elapsedTime == totalTime) {
+    if (habitList[index].initialHabbitTime + habitList[index].elapsedTime >=
+        totalTime) {
+      habitList[index].running = false;
+      update();
       showDialog(
           context: navigator!.context,
           builder: (context) => AlertDialog(
@@ -81,15 +74,16 @@ class DbController extends GetxController {
                 actions: [
                   TextButton(
                       onPressed: () {
-                        list.initialHabbitTime.value = 0;
-                        elapsedTime = 0;
+                        habitList[index].initialHabbitTime = 0;
+                        habitList[index].elapsedTime = 0;
+                        update();
+
                         navigator!.pop();
                       },
                       child: const Text('Yes')),
                   TextButton(
                       onPressed: () {
                         navigator!.pop();
-                        list.running.value = false;
                       },
                       child: const Text('No'))
                 ],
@@ -97,34 +91,38 @@ class DbController extends GetxController {
     }
 
     DateTime time = DateTime.now();
-    if (list.running.value) {
-      elapsedTime += list.initialHabbitTime.value;
-      print('time outside: ${elapsedTime.toStringAsFixed(2)}');
+    if (habitList[index].running) {
+      habitList[index].elapsedTime += habitList[index].initialHabbitTime;
+      print('time outside: ${habitList[index].elapsedTime.toStringAsFixed(2)}');
 
       Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-        list.initialHabbitTime.value = list.initialHabbitTime.value;
+        habitList[index].initialHabbitTime = habitList[index].initialHabbitTime;
 
-        if (list.running.value == false ||
-            list.initialHabbitTime.value + elapsedTime >= totalTime) {
-          timer.cancel();
-          list.running.value = false;
-          print('time running: ${elapsedTime.toStringAsFixed(2)}');
-          if (list.initialHabbitTime.value + elapsedTime >= totalTime) {
-            timer.cancel();
-
+        if (habitList[index].running == false ||
+            habitList[index].initialHabbitTime + habitList[index].elapsedTime >=
+                totalTime) {
+          print(
+              'time running: ${habitList[index].elapsedTime.toStringAsFixed(2)}');
+          if (habitList[index].initialHabbitTime +
+                  habitList[index].elapsedTime >=
+              totalTime) {
             // show notification
             Get.rawSnackbar(message: 'Habbit completed');
-            list.running.value = false;
           }
+          habitList[index].running = false;
+          update();
+          timer.cancel();
 
           // box.put(habbitListKey(DateTime.now()), habitList);
         } else {
-          habitList[index].completed = true.obs;
+          habitList[index].completed = true;
           var time2 = DateTime.now();
-          list.initialHabbitTime.value =
+
+          habitList[index].initialHabbitTime =
               ((time2.difference(time).inSeconds) / 60).toDouble();
+          update();
           print(
-              'total time: ${list.initialHabbitTime.value.toStringAsFixed(2)}');
+              'total time ${habitList[index].title}: ${habitList[index].initialHabbitTime.toStringAsFixed(2)}');
         }
       });
     }

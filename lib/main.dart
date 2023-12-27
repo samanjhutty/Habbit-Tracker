@@ -12,7 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(HabitModelAdapter());
-  box = await Hive.openBox<List<HabitModel>>(BoxConstants.boxName);
+  box = await Hive.openBox(BoxConstants.boxName);
 
   runApp(const MyApp());
 }

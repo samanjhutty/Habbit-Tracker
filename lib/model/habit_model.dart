@@ -1,4 +1,3 @@
-import 'package:get/get.dart';
 import 'package:hive/hive.dart';
 part 'habit_model.g.dart';
 
@@ -7,37 +6,43 @@ class HabitModel {
   HabitModel(
       {required this.title,
       required this.initialHabbitTime,
+      required this.elapsedTime,
       required this.totalHabbitTime,
       required this.running,
       required this.completed});
 
   @HiveField(0)
-  final RxString title;
+  String title;
 
   @HiveField(1)
-  RxBool running;
+  bool running;
 
   @HiveField(2)
-  final RxDouble totalHabbitTime;
+  double initialHabbitTime;
 
   @HiveField(3)
-  final RxDouble initialHabbitTime;
+  double elapsedTime;
 
   @HiveField(4)
-  RxBool completed;
+  double totalHabbitTime;
+
+  @HiveField(5)
+  bool completed;
 }
 
 List<HabitModel> habitList = [
   HabitModel(
-      title: 'Exercise'.obs,
-      initialHabbitTime: 0.0.obs,
-      totalHabbitTime: 61.0.obs,
-      running: false.obs,
-      completed: false.obs),
+      title: 'Exercise',
+      initialHabbitTime: 0.0,
+      elapsedTime: 0.0,
+      totalHabbitTime: 61.0,
+      running: false,
+      completed: false),
   HabitModel(
-      title: 'Test'.obs,
-      initialHabbitTime: 0.0.obs,
-      totalHabbitTime: 1.0.obs,
-      running: false.obs,
-      completed: false.obs),
+      title: 'Test',
+      initialHabbitTime: 0.0,
+      elapsedTime: 0.0,
+      totalHabbitTime: 1.0,
+      running: false,
+      completed: false),
 ];
