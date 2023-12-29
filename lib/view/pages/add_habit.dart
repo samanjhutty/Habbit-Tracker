@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -21,7 +22,9 @@ class _AddHabitState extends State<AddHabit> {
   TextEditingController timeController = TextEditingController();
 
   final formkey = GlobalKey<FormState>();
-  TimeOfDay? time = const TimeOfDay(hour: 1, minute: 0);
+  TimeOfDay? time = kDebugMode
+      ? const TimeOfDay(hour: 0, minute: 1)
+      : const TimeOfDay(hour: 1, minute: 0);
 
   DbController db = Get.find();
   TimeController timedb = Get.find();

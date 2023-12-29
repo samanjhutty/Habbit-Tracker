@@ -140,10 +140,10 @@ class _SignUpState extends State<SignUp> {
 
   @override
   void dispose() {
-    provider.username.dispose();
-    provider.emailAddress.dispose();
-    provider.password.dispose();
-    provider.confirmPassword.dispose();
+    provider.username.clear();
+    provider.emailAddress.clear();
+    provider.password.clear();
+    provider.confirmPassword.clear();
     super.dispose();
   }
 }

@@ -60,7 +60,7 @@ class _UserProfileState extends State<UserProfile> {
                         child: Padding(
                           padding: EdgeInsets.all(8),
                           child: Text(
-                              'Your data is being stored in your device., if you unisatall app your data will be deleted'),
+                              'Your data is being stored in your device., if you uninstall app your data will be deleted permanently'),
                         ),
                       )
                     ],

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:habbit_tracker/controller/local/db_constants.dart';
@@ -53,7 +54,9 @@ class DbController extends GetxController {
             child: child!),
         initialEntryMode: TimePickerEntryMode.input,
         context: context,
-        initialTime: const TimeOfDay(hour: 1, minute: 0));
+        initialTime: kDebugMode
+            ? const TimeOfDay(hour: 0, minute: 1)
+            : const TimeOfDay(hour: 1, minute: 0));
     return time;
   }
 
@@ -149,7 +152,7 @@ class DbController extends GetxController {
     }
   }
 
-  percentCompleted() async {
+  double percentCompleted() {
     double completed = 0.0;
     for (int i = 0; i < habitList.length; i++) {
       if (habitList[i].completed == true) {
@@ -158,9 +161,10 @@ class DbController extends GetxController {
     }
     double percentSummary =
         habitList.isNotEmpty ? completed / habitList.length : 0.0;
-    box.put(BoxConstants.habitSummaryText + habbitListKey(DateTime.now()),
-        percentSummary);
+    // box.put(BoxConstants.habitSummaryText + habbitListKey(DateTime.now()),
+    //     percentSummary);
     print('Percent completed: $percentSummary');
+    return percentSummary;
   }
 
   loadHeatMap() {
@@ -168,8 +172,8 @@ class DbController extends GetxController {
 
     int dayInBW = DateTime.now().difference(date).inDays;
     for (int i = 0; i <= dayInBW; i++) {
-      double strength =
-          box.get(BoxConstants.habitSummaryText + habbitListKey(date)) ?? 0.0;
+      double strength = percentCompleted();
+      // box.get(BoxConstants.habitSummaryText + habbitListKey(date)) ?? 0.0;
 
       int year = date.year;
       int month = date.month;

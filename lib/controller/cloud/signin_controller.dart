@@ -55,26 +55,18 @@ class SignInAuth with ChangeNotifier {
 
   Future<void> googleLogin() async {
     try {
-      final GoogleSignIn googleSignInID = GoogleSignIn(
-          clientId:
-              '972040701571-4h6tsm7rjrci9272sa3cnt9ur94j1plq.apps.googleusercontent.com');
+      final GoogleSignIn googleSignInID = GoogleSignIn();
 
-      if (kIsWeb) {
-        GoogleAuthProvider authProvider = GoogleAuthProvider();
-        await auth.signInWithPopup(authProvider);
-        notifyListeners();
-      } else {
-        final GoogleSignInAccount? googleUser = await googleSignInID.signIn();
-        final GoogleSignInAuthentication? googleAuth =
-            await googleUser?.authentication;
+      final GoogleSignInAccount? googleUser = await googleSignInID.signIn();
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser?.authentication;
 
-        final credential = GoogleAuthProvider.credential(
-            accessToken: googleAuth!.accessToken, idToken: googleAuth.idToken);
+      final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth!.accessToken, idToken: googleAuth.idToken);
 
-        await auth.signInWithCredential(credential);
-        notifyListeners();
-      }
-      Get.back();
+      await auth.signInWithCredential(credential);
+      notifyListeners();
+      Get.until(ModalRoute.withName('/'));
       Get.rawSnackbar(message: 'Logged in via Google');
     } on FirebaseAuthException {
       Get.until(ModalRoute.withName('/'));
@@ -113,21 +105,18 @@ class SignInAuth with ChangeNotifier {
             final GoogleSignIn googleSignInID = GoogleSignIn(
                 clientId:
                     '972040701571-4h6tsm7rjrci9272sa3cnt9ur94j1plq.apps.googleusercontent.com');
-            if (kIsWeb) {
-              GoogleAuthProvider authProvider = GoogleAuthProvider();
-              await auth.currentUser!.reauthenticateWithPopup(authProvider);
-            } else {
-              final GoogleSignInAccount? googleUser =
-                  await googleSignInID.signIn();
-              final GoogleSignInAuthentication? googleAuth =
-                  await googleUser?.authentication;
 
-              credential = GoogleAuthProvider.credential(
-                  accessToken: googleAuth!.accessToken,
-                  idToken: googleAuth.idToken);
-              await auth.currentUser!.reauthenticateWithCredential(credential);
-            }
+            final GoogleSignInAccount? googleUser =
+                await googleSignInID.signIn();
+            final GoogleSignInAuthentication? googleAuth =
+                await googleUser?.authentication;
+
+            credential = GoogleAuthProvider.credential(
+                accessToken: googleAuth!.accessToken,
+                idToken: googleAuth.idToken);
+            await auth.currentUser!.reauthenticateWithCredential(credential);
           }
+
           break;
         case 'password':
           try {

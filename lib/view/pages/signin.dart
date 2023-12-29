@@ -172,8 +172,8 @@ class _SignInState extends State<SignIn> {
 
   @override
   void dispose() {
-    provider.password.dispose();
-    provider.emailAddress.dispose();
+    provider.password.clear();
+    provider.emailAddress.clear();
     super.dispose();
   }
 }

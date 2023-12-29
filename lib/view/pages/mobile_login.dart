@@ -99,7 +99,7 @@ class _MobileLoginState extends State<MobileLogin> {
       );
   @override
   void dispose() {
-    provider.phone.dispose();
+    provider.phone.clear();
     super.dispose();
   }
 }

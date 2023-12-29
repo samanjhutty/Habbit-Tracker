@@ -56,17 +56,7 @@ class _MyHomeTabState extends State<MyHomeTab> {
                 style: const TextStyle(color: Colors.grey, fontSize: 12)),
           ),
         ),
-        body: db.habitList.isEmpty
-            ? const Center(
-                child: Text(
-                  "No habbit maintained, let's build a new one!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
-                ),
-              )
-            : const HabitTile(),
+        body: const HabitTile(),
       ),
     );
   }
