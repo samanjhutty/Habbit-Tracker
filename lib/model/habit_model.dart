@@ -1,4 +1,4 @@
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 part 'habit_model.g.dart';
 
 @HiveType(typeId: 1)
@@ -15,34 +15,17 @@ class HabitModel {
   String title;
 
   @HiveField(1)
-  bool running;
-
-  @HiveField(2)
   double initialHabbitTime;
 
-  @HiveField(3)
+  @HiveField(2)
   double elapsedTime;
 
-  @HiveField(4)
+  @HiveField(3)
   double totalHabbitTime;
+
+  @HiveField(4)
+  bool running;
 
   @HiveField(5)
   bool completed;
 }
-
-List<HabitModel> habitList = [
-  HabitModel(
-      title: 'Exercise',
-      initialHabbitTime: 0.0,
-      elapsedTime: 0.0,
-      totalHabbitTime: 61.0,
-      running: false,
-      completed: false),
-  HabitModel(
-      title: 'Test',
-      initialHabbitTime: 0.0,
-      elapsedTime: 0.0,
-      totalHabbitTime: 1.0,
-      running: false,
-      completed: false),
-];

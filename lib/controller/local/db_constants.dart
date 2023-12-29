@@ -8,9 +8,6 @@ class BoxConstants {
   static const startDateKey = 'APP-START-DATE';
 
   // For each individual habit
-  static const habitTitleKey = 'Habit-Title';
-  static const habitElapsedTimeKey = 'Habit-Emapsed-Time';
-  static const habitInitialTimekey = 'Habit-Initial-Time';
-  static const habitTotalTimeKey = 'Habit-Total-Time';
-  static const habitRunningKey = 'Habit-Running';
+  static const habitListKeyText = 'HabitList-day:';
+  static const habitSummaryText = 'Habit-Summary';
 }

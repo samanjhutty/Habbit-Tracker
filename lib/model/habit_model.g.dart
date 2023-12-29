@@ -18,10 +18,10 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
     };
     return HabitModel(
       title: fields[0] as String,
-      initialHabbitTime: fields[2] as double,
-      elapsedTime: fields[3] as double,
-      totalHabbitTime: fields[4] as double,
-      running: fields[1] as bool,
+      initialHabbitTime: fields[1] as double,
+      elapsedTime: fields[2] as double,
+      totalHabbitTime: fields[3] as double,
+      running: fields[4] as bool,
       completed: fields[5] as bool,
     );
   }
@@ -33,13 +33,13 @@ class HabitModelAdapter extends TypeAdapter<HabitModel> {
       ..writeByte(0)
       ..write(obj.title)
       ..writeByte(1)
-      ..write(obj.running)
-      ..writeByte(2)
       ..write(obj.initialHabbitTime)
-      ..writeByte(3)
+      ..writeByte(2)
       ..write(obj.elapsedTime)
-      ..writeByte(4)
+      ..writeByte(3)
       ..write(obj.totalHabbitTime)
+      ..writeByte(4)
+      ..write(obj.running)
       ..writeByte(5)
       ..write(obj.completed);
   }

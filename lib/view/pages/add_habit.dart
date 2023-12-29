@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:habbit_tracker/controller/local/db_constants.dart';
 import 'package:habbit_tracker/controller/local/db_controller.dart';
-import 'package:habbit_tracker/controller/local/time_controller.dart';
-
+import 'package:habbit_tracker/controller/time_controller.dart';
 import '../../model/habit_model.dart';
 
 class AddHabit extends StatefulWidget {
@@ -44,26 +44,25 @@ class _AddHabitState extends State<AddHabit> {
   @override
   Widget build(BuildContext context) {
     ColorScheme scheme = Theme.of(context).colorScheme;
-    bool isMobile = MediaQuery.of(context).orientation == Orientation.portrait;
-
-    double myWidth = isMobile ? 350 : 460;
+    double myWidth = 350;
 
     return Scaffold(
-      body: Stack(
-        children: [
-          Center(
-            child: SafeArea(
-              child: SizedBox(
-                width: myWidth,
-                child: Form(
-                  key: formkey,
+      appBar: AppBar(surfaceTintColor: Colors.transparent),
+      body: Center(
+        child: SingleChildScrollView(
+          child: SafeArea(
+            child: SizedBox(
+              width: myWidth,
+              child: Form(
+                key: formkey,
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'New Habit',
-                        style: TextStyle(
-                            color: scheme.primaryContainer, fontSize: 36),
+                        style: TextStyle(color: scheme.primary, fontSize: 36),
                       ),
                       const SizedBox(height: 8),
                       const Text(
@@ -80,14 +79,12 @@ class _AddHabitState extends State<AddHabit> {
                           }
                         },
                         inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp('[a-zA-Z]+'))
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z\s]')),
                         ],
-                        decoration: InputDecoration(
-                            focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    width: 2, color: scheme.inversePrimary)),
-                            border: const OutlineInputBorder(),
-                            label: const Text('Habit name')),
+                        decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            label: Text('Habit name')),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(top: 16),
@@ -99,8 +96,8 @@ class _AddHabitState extends State<AddHabit> {
                                 style: TextStyle(fontSize: 16),
                               ),
                               SizedBox(
-                                width: 120,
-                                child: TextFormField(
+                                width: 84,
+                                child: TextField(
                                   controller: timeController,
                                   onTap: () async {
                                     time =
@@ -112,13 +109,9 @@ class _AddHabitState extends State<AddHabit> {
                                     });
                                   },
                                   readOnly: true,
-                                  decoration: InputDecoration(
-                                      focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                              width: 2,
-                                              color: scheme.inversePrimary)),
-                                      border: const OutlineInputBorder(),
-                                      label: const Text('Tap to set')),
+                                  decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      label: Text('Tap to set')),
                                 ),
                               ),
                               const SizedBox()
@@ -170,15 +163,17 @@ class _AddHabitState extends State<AddHabit> {
                                                     .timeOfDayToDouble(time!)
                                                 : widget.data!.totalHabbitTime,
                                             listDayKey:
-                                                DbController.habbitListKey(
-                                                    DateTime.now()),
+                                                BoxConstants.habitListKeyText +
+                                                    DbController.habbitListKey(
+                                                        DateTime.now()),
                                             isStart: isStarted);
                                     Navigator.pop(context);
+                                    db.update();
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: scheme.primaryContainer,
-                                  foregroundColor: scheme.onPrimaryContainer,
+                                  backgroundColor: scheme.primary,
+                                  foregroundColor: scheme.onPrimary,
                                   padding:
                                       const EdgeInsets.symmetric(vertical: 20),
                                 ),
@@ -192,11 +187,14 @@ class _AddHabitState extends State<AddHabit> {
               ),
             ),
           ),
-          IconButton(
-              onPressed: () => navigator!.pop(),
-              icon: const Icon(Icons.arrow_back))
-        ],
+        ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
   }
 }
